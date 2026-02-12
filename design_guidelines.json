@@ -1,0 +1,156 @@
+{
+  "identity": {
+    "name": "E1: The Anti-AI Designer",
+    "theme_name": "Electric Enterprise (Void & Neon)",
+    "mission": "Build an enterprise-grade AI engagement platform that feels like a futuristic command center, not a generic SaaS.",
+    "core_principles": [
+      "Fusion over Imitation: Mix 'Swiss Precision' with 'Cyberpunk Data'",
+      "Density is Clarity: High information density, but perfect hierarchy",
+      "Dark Mode First: Optimized for 24/7 operations center usage"
+    ]
+  },
+  "typography": {
+    "font_family": {
+      "headings": "Plus Jakarta Sans, sans-serif",
+      "body": "Inter, sans-serif",
+      "mono": "JetBrains Mono, monospace"
+    },
+    "scale": {
+      "h1": "text-4xl font-bold tracking-tight lg:text-5xl",
+      "h2": "text-3xl font-semibold tracking-tight",
+      "h3": "text-2xl font-semibold tracking-tight",
+      "p": "leading-7 [&:not(:first-child)]:mt-6",
+      "small": "text-sm font-medium leading-none"
+    },
+    "instructions": "Import 'Plus Jakarta Sans' and 'Inter' from Google Fonts. Use Plus Jakarta for all headings (h1-h4) and Inter for body text. Use JetBrains Mono for ID badges, API keys, and raw data views."
+  },
+  "colors": {
+    "palette": {
+      "background": "#030712",
+      "foreground": "#f9fafb",
+      "card": "#111827",
+      "card_foreground": "#f9fafb",
+      "popover": "#111827",
+      "popover_foreground": "#f9fafb",
+      "primary": "#8b5cf6",
+      "primary_foreground": "#ffffff",
+      "secondary": "#1f2937",
+      "secondary_foreground": "#f9fafb",
+      "muted": "#1f2937",
+      "muted_foreground": "#9ca3af",
+      "accent": "#1f2937",
+      "accent_foreground": "#f9fafb",
+      "destructive": "#7f1d1d",
+      "destructive_foreground": "#f9fafb",
+      "border": "#1f2937",
+      "input": "#1f2937",
+      "ring": "#8b5cf6"
+    },
+    "semantic": {
+      "success": "#10b981",
+      "warning": "#f59e0b",
+      "error": "#ef4444",
+      "info": "#3b82f6",
+      "ai_glow": "#a855f7"
+    },
+    "gradients": {
+      "primary_glow": "linear-gradient(135deg, #8b5cf6 0%, #d946ef 100%)",
+      "subtle_void": "linear-gradient(to bottom right, #111827, #030712)"
+    }
+  },
+  "spacing": {
+    "scale": "Generous Spacing (2-3x normal)",
+    "container_padding": "p-6 md:p-8 lg:p-12",
+    "section_gap": "gap-8 lg:gap-12",
+    "grid_gap": "gap-6",
+    "component_padding": "p-6"
+  },
+  "visual_enhancers": {
+    "borders": "1px solid #1f2937 (Gray 800)",
+    "radius": "rounded-lg",
+    "shadows": {
+      "card": "0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3)",
+      "glow": "0 0 15px rgba(139, 92, 246, 0.3)"
+    },
+    "effects": {
+      "glass": "bg-black/40 backdrop-blur-xl border-white/10",
+      "neon_border": "border border-purple-500/50 shadow-[0_0_10px_rgba(168,85,247,0.2)]"
+    }
+  },
+  "layout_strategies": {
+    "dashboard": {
+      "type": "Bento Grid",
+      "grid_cols": "grid-cols-1 md:grid-cols-4 lg:grid-cols-12",
+      "gap": "gap-6",
+      "rules": "Use 'col-span-full' for Hero charts, 'col-span-4' for lists, 'col-span-3' for stats. Never equal squares."
+    },
+    "inbox": {
+      "type": "Three-Pane Split",
+      "pane_1": "w-64 (Sidebar - Nav/Channels)",
+      "pane_2": "w-96 (Message List)",
+      "pane_3": "flex-1 (Conversation View + Context)",
+      "rules": "Full height (h-screen), scrollable independently. Dense information."
+    }
+  },
+  "components": {
+    "cards": {
+      "style": "Flat, Dark, Bordered",
+      "classes": "bg-card border border-border rounded-lg p-6 hover:border-primary/50 transition-colors"
+    },
+    "buttons": {
+      "primary": "bg-primary text-primary-foreground hover:bg-primary/90 shadow-[0_0_10px_rgba(139,92,246,0.3)]",
+      "secondary": "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+      "ghost": "hover:bg-accent hover:text-accent-foreground"
+    },
+    "inputs": {
+      "style": "bg-input/50 border-border focus:ring-primary focus:border-primary"
+    },
+    "badges": {
+      "style": "rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset"
+    }
+  },
+  "motion": {
+    "library": "framer-motion",
+    "transitions": {
+      "default": "transition-all duration-200 ease-in-out",
+      "page_load": "initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}"
+    }
+  },
+  "image_urls": {
+    "login_background": "https://images.unsplash.com/photo-1759159347827-de3a54002de7?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NjZ8MHwxfHNlYXJjaHwxfHxhYnN0cmFjdCUyMGRpZ2l0YWwlMjBnZW9tZXRyaWMlMjBkYXJrJTIwYmFja2dyb3VuZCUyMHRlY2hub2xvZ3l8ZW58MHx8fHwxNzcwODk1NjQ1fDA&ixlib=rb-4.1.0&q=85",
+    "avatars": [
+      "https://images.unsplash.com/photo-1769628027250-d2a7a5a4eb64?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjY2NzN8MHwxfHNlYXJjaHwzfHxwcm9mZXNzaW9uYWwlMjBoZWFkc2hvdCUyMHBvcnRyYWl0JTIwZGl2ZXJzZXxlbnwwfHx8fDE3NzA4OTU2NDV8MA&ixlib=rb-4.1.0&q=85",
+      "https://images.unsplash.com/photo-1680690517143-d813ac08cd13?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjY2NzN8MHwxfHNlYXJjaHwyfHxwcm9mZXNzaW9uYWwlMjBoZWFkc2hvdCUyMHBvcnRyYWl0JTIwZGl2ZXJzZXxlbnwwfHx8fDE3NzA4OTU2NDV8MA&ixlib=rb-4.1.0&q=85",
+      "https://images.unsplash.com/photo-1659100945401-e23319500ffd?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjY2NzN8MHwxfHNlYXJjaHw0fHxwcm9mZXNzaW9uYWwlMjBoZWFkc2hvdCUyMHBvcnRyYWl0JTIwZGl2ZXJzZXxlbnwwfHx8fDE3NzA4OTU2NDV8MA&ixlib=rb-4.1.0&q=85",
+      "https://images.unsplash.com/photo-1659100939529-7008a25e447c?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjY2NzN8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBoZWFkc2hvdCUyMHBvcnRyYWl0JTIwZGl2ZXJzZXxlbnwwfHx8fDE3NzA4OTU2NDV8MA&ixlib=rb-4.1.0&q=85"
+    ]
+  },
+  "accessibility": {
+    "contrast_check": "Ensure 4.5:1 contrast ratio for all text.",
+    "focus_states": "Visible focus ring (#8b5cf6) on all interactive elements.",
+    "aria": "Use aria-label for icon-only buttons."
+  },
+  "instructions_to_main_agent": [
+    "1. THEME SETUP: Update 'tailwind.config.js' and 'index.css' FIRST with the provided color palette. This sets the foundation.",
+    "2. FONT SETUP: Add Google Fonts link for Plus Jakarta Sans and Inter to public/index.html.",
+    "3. LAYOUT: Build the 'Dashboard' using the Bento Grid strategy. Don't just stack cards.",
+    "4. COMPONENTS: Use Shadcn components but override their styles with the provided 'visual_enhancers' (e.g., add glow to primary buttons).",
+    "5. INBOX: This is the core feature. Spend extra effort on the 3-pane layout. It must feel like a native app (no scrollbars on the body, only inside panes).",
+    "6. AI INTEGRATION: Use the 'ai_glow' color for any AI-generated text or buttons to distinguish it from human actions.",
+    "7. DATA: Use 'recharts' for analytics. Style them to match the dark theme (no white backgrounds on charts).",
+    "8. MICRO-INTERACTIONS: Add hover states to everything. Rows in tables should highlight slightly on hover.",
+    "9. TOASTS: Use 'sonner' for notifications."
+  ],
+  "universal_guidelines": [
+    "Dark colors look good when used independently without gradients. DO NOT use dark colors as gradients.",
+    "Don't make generic centered layouts, simplistic gradients, and uniform styling.",
+    "Create depth through layered design elements with z-index hierarchy.",
+    "Use glass-morphism effects with backdrop filters (12-24px blur).",
+    "You MUST NOT apply universal transition. Eg: 'transition: all'.",
+    "You MUST NOT center align the app container.",
+    "Always use modern button styles like pill-shaped, or sharp button with interaction animations.",
+    "NEVER use AI assistant Emoji characters like 🤖🧠 etc for icons. Use Lucid React icons.",
+    "Every interaction needs micro-animations - hover states, transitions, parallax effects.",
+    "Use 2-3x more spacing than feels comfortable."
+  ]
+}
