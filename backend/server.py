@@ -627,7 +627,7 @@ async def trigger_ai_response(convo_id: str, request: Request):
         raise HTTPException(status_code=404, detail="Conversation not found")
     messages_history = await db.messages.find({"conversation_id": convo_id}, {"_id": 0}).sort("created_at", 1).to_list(20)
     customer = await db.customers.find_one({"id": convo.get("customer_id", "")}, {"_id": 0})
-    result = await generate_ai_response(messages_history, customer)
+    result = await generate_ai_response(messages_history, customer, db=db)
     ai_msg_id = make_id()
     ai_message = {
         "id": ai_msg_id, "conversation_id": convo_id, "content": result["response"],
@@ -638,7 +638,9 @@ async def trigger_ai_response(convo_id: str, request: Request):
     await db.conversations.update_one({"id": convo_id}, {"$set": {
         "last_message": result["response"][:100], "last_message_at": now_iso(), "updated_at": now_iso(),
     }, "$inc": {"message_count": 1}})
-    return clean_doc(ai_message)
+    ai_msg = clean_doc(ai_message)
+    await emit_new_message(convo_id, ai_msg)
+    return ai_msg
 
 
 @api.post("/conversations/{convo_id}/summarize")
