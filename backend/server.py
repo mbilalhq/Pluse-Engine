@@ -1118,6 +1118,149 @@ async def dashboard_feed(request: Request):
     return {"recent_conversations": recent_convos, "recent_leads": recent_leads, "recent_tickets": recent_tickets}
 
 
+# ─── WHATSAPP MESSAGING ───────────────────────────────────────
+async def send_whatsapp_message(to_phone: str, message_text: str):
+    """Send a WhatsApp message via Meta Business API"""
+    if not WHATSAPP_PHONE_ID or not WHATSAPP_TOKEN:
+        logger.warning("WhatsApp credentials not configured")
+        return False
+    # Clean phone number
+    phone = to_phone.strip().replace('+', '').replace(' ', '').replace('-', '')
+    if not phone.startswith('0') and len(phone) < 12:
+        phone = phone
+    url = f"https://graph.facebook.com/v21.0/{WHATSAPP_PHONE_ID}/messages"
+    headers = {"Authorization": f"Bearer {WHATSAPP_TOKEN}", "Content-Type": "application/json"}
+    payload = {
+        "messaging_product": "whatsapp",
+        "to": phone,
+        "type": "text",
+        "text": {"body": message_text}
+    }
+    try:
+        async with httpx.AsyncClient() as client:
+            resp = await client.post(url, json=payload, headers=headers, timeout=15.0)
+            if resp.status_code == 200:
+                logger.info(f"WhatsApp message sent to {phone}")
+                return True
+            else:
+                logger.error(f"WhatsApp send failed: {resp.status_code} {resp.text}")
+                return False
+    except Exception as e:
+        logger.error(f"WhatsApp send error: {e}")
+        return False
+
+
+@api.post("/whatsapp/send")
+async def api_send_whatsapp(request: Request, to: str = Body(...), message: str = Body(...)):
+    """Manual WhatsApp message send endpoint"""
+    current_user = await get_current_user_flexible(request)
+    success = await send_whatsapp_message(to, message)
+    return {"success": success, "to": to}
+
+
+# ─── COMPANY PRODUCT DATA (for RAG) ───────────────────────────
+class ProductCreate(BaseModel):
+    name: str
+    description: str = ""
+    price: str = ""
+    category: str = "general"
+    features: list = []
+
+class FAQCreate(BaseModel):
+    question: str
+    answer: str
+    category: str = "general"
+
+
+@api.get("/company-data/products")
+async def list_products(request: Request):
+    current_user = await get_current_user_flexible(request)
+    company_id = current_user.get("company_id", "")
+    products = await db.company_products.find({"company_id": company_id} if company_id else {}, {"_id": 0}).to_list(200)
+    return products
+
+
+@api.post("/company-data/products")
+async def create_product(body: ProductCreate, request: Request):
+    current_user = await get_current_user_flexible(request)
+    prod = {
+        "id": make_id(),
+        "company_id": current_user.get("company_id", ""),
+        "name": body.name,
+        "description": body.description,
+        "price": body.price,
+        "category": body.category,
+        "features": body.features,
+        "created_at": now_iso(),
+        "updated_at": now_iso(),
+    }
+    await db.company_products.insert_one(prod)
+    return clean_doc(prod)
+
+
+@api.put("/company-data/products/{product_id}")
+async def update_product(product_id: str, request: Request, updates: dict = Body(...)):
+    current_user = await get_current_user_flexible(request)
+    updates.pop("_id", None)
+    updates["updated_at"] = now_iso()
+    await db.company_products.update_one({"id": product_id}, {"$set": updates})
+    prod = await db.company_products.find_one({"id": product_id}, {"_id": 0})
+    return prod
+
+
+@api.delete("/company-data/products/{product_id}")
+async def delete_product(product_id: str, request: Request):
+    current_user = await get_current_user_flexible(request)
+    await db.company_products.delete_one({"id": product_id})
+    return {"status": "deleted"}
+
+
+@api.get("/company-data/faqs")
+async def list_faqs(request: Request):
+    current_user = await get_current_user_flexible(request)
+    company_id = current_user.get("company_id", "")
+    faqs = await db.company_faqs.find({"company_id": company_id} if company_id else {}, {"_id": 0}).to_list(200)
+    return faqs
+
+
+@api.post("/company-data/faqs")
+async def create_faq(body: FAQCreate, request: Request):
+    current_user = await get_current_user_flexible(request)
+    faq = {
+        "id": make_id(),
+        "company_id": current_user.get("company_id", ""),
+        "question": body.question,
+        "answer": body.answer,
+        "category": body.category,
+        "created_at": now_iso(),
+    }
+    await db.company_faqs.insert_one(faq)
+    return clean_doc(faq)
+
+
+@api.delete("/company-data/faqs/{faq_id}")
+async def delete_faq(faq_id: str, request: Request):
+    current_user = await get_current_user_flexible(request)
+    await db.company_faqs.delete_one({"id": faq_id})
+    return {"status": "deleted"}
+
+
+# ─── LEAD NURTURING ────────────────────────────────────────────
+@api.post("/leads/{lead_id}/nurture")
+async def nurture_lead(lead_id: str, request: Request):
+    """Generate personalized nurture message for a lead"""
+    current_user = await get_current_user_flexible(request)
+    lead = await db.leads.find_one({"id": lead_id}, {"_id": 0})
+    if not lead:
+        raise HTTPException(status_code=404, detail="Lead not found")
+    company_context = await get_company_knowledge(db, current_user.get("company_id", ""))
+    result = await generate_nurture_message(lead, lead.get("status", "new"), company_context)
+    # Store nurture activity
+    activity = {"type": "nurture", "content": result["message"], "stage": result["stage"], "date": now_iso()}
+    await db.leads.update_one({"id": lead_id}, {"$push": {"activities": activity}, "$set": {"updated_at": now_iso()}})
+    return result
+
+
 app.include_router(api)
 fastapi_app.include_router(api)
 
