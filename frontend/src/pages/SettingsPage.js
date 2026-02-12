@@ -97,12 +97,22 @@ export default function SettingsPage() {
 
   const tabs = [
     { id: 'channels', label: 'Channels', icon: MessageSquare },
+    { id: 'company-data', label: 'Company Data', icon: Database },
     { id: 'company', label: 'Company', icon: Globe },
     { id: 'ai', label: 'AI Config', icon: Bot },
     { id: 'templates', label: 'Templates', icon: MessageSquare },
     { id: 'users', label: 'Users', icon: Users },
     { id: 'security', label: 'Security', icon: Shield },
   ];
+
+  const createProduct = async () => {
+    try { await api.post('/company-data/products', productForm); setShowProductForm(false); setProductForm({ name: '', description: '', price: '', category: 'general' }); const r = await api.get('/company-data/products'); setProducts(r.data); } catch (err) { console.error(err); }
+  };
+  const deleteProduct = async (id) => { try { await api.delete(`/company-data/products/${id}`); setProducts(prev => prev.filter(p => p.id !== id)); } catch (err) { console.error(err); } };
+  const createFaq = async () => {
+    try { await api.post('/company-data/faqs', faqForm); setShowFaqForm(false); setFaqForm({ question: '', answer: '', category: 'general' }); const r = await api.get('/company-data/faqs'); setFaqs(r.data); } catch (err) { console.error(err); }
+  };
+  const deleteFaq = async (id) => { try { await api.delete(`/company-data/faqs/${id}`); setFaqs(prev => prev.filter(f => f.id !== id)); } catch (err) { console.error(err); } };
 
   return (
     <div className="p-6 lg:p-8" data-testid="settings-page">
