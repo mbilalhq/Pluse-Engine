@@ -4,7 +4,7 @@ import sys
 from datetime import datetime
 
 class PulseEngineAPITester:
-    def __init__(self, base_url="https://dev-build-8.preview.emergentagent.com"):
+    def __init__(self, base_url="https://pulse-engine-support.preview.emergentagent.com"):
         self.base_url = base_url
         self.token = None
         self.tests_run = 0

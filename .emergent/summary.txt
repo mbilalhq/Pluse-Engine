@@ -1,0 +1,221 @@
+<analysis>**original_problem_statement:**
+The user wants to build a comprehensive, enterprise-grade AI-powered customer support platform named Pulse Engine.
+
+PRODUCT REQUIREMENTS:
+- **Integrations:** Meta suite (WhatsApp, Instagram, Facebook) and a website chat widget.
+- **AI Core:** Use the user's provided Gemini API key. Implement advanced RAG for personalized responses based on company-specific data. Add sentiment analysis.
+- **Authentication:** Implement JWT-based custom authentication with RBAC (Admin, Manager, Agent, Analyst roles), plus Google and Facebook social logins.
+- **Database:** Use MongoDB. The user explicitly rejected PostgreSQL.
+- **Multi-tenancy:**
+    - Companies should register and provide details (name, employee count).
+    - Each company needs a settings page to add their own social media API keys.
+    - Companies must be able to upload their own product data to power the RAG system.
+- **User Interface:**
+    - A professional, well-designed UI with a proper landing page, header, footer, and separate Sign In/Sign Up pages.
+    - A unified inbox that displays all social media channels side-by-side in a 4-column layout.
+    - A feature to maximize a selected conversation thread within the inbox.
+- **Real-time Functionality:** Implement WebSockets (Socket.io) for real-time message updates in the inbox.
+- **Business Logic:** Implement lead nurturing automation.
+
+**User's preferred language**: English
+
+**what currently exists?**
+A full-stack application (React frontend, FastAPI backend) named Pulse Engine. The backend includes JWT and Google authentication, data models for a multi-tenant CRM, and endpoints for user/company registration. The frontend features a landing page, separate auth pages, a dashboard, and a 4-column unified inbox. The backend code for WebSockets, RAG, WhatsApp integration, and lead nurturing has been added but is broken and has caused the server to fail. Frontend placeholders for these features (e.g., a Company Data tab) have been created but are not functional.
+
+**Last working item**:
+- **Last item agent was working:** The agent was simultaneously implementing multiple major backend features: WebSocket integration, a WhatsApp messaging endpoint, advanced RAG with company data, and lead nurturing automation. This involved massive additions to . The agent was also adding UI placeholders on the frontend for these features on the Settings and Leads pages.
+- **Status:** BLOCKED
+- **Agent Testing Done:** N
+- **Which testing method agent to use?** both
+- **User Testing Done:** N
+
+**All Pending/In progress Issue list**:
+-   Issue 1: Backend Server is Down (P0)
+-   Issue 2: Incomplete WebSocket Implementation (P1)
+-   Issue 3: Incomplete RAG and Company Data Feature (P1)
+-   Issue 4: Incomplete Lead Nurturing Automation (P2)
+-   Issue 5: Incomplete WhatsApp Integration (P2)
+-   Issue 6: Maximize Message Inbox Feature Not Started (P3)
+-   Issue 7: End-to-End Google Auth Flow Not Verified (P3)
+
+**Issues Detail:**
+-   **Issue 1: Backend Server is Down**
+    -   **Attempted fixes:** The agent made several attempts to fix  by reordering router inclusions and correcting the  event handler syntax. These fixes were insufficient as the root cause is the large volume of complex, untested code added in one go.
+    -   **Next debug checklist:**
+        1.  Systematically comment out the newly added code blocks in  related to WebSockets, RAG, WhatsApp, and lead nurturing.
+        2.  Restart the server to confirm it runs with the core, previously-working functionalities.
+        3.  Re-introduce each new feature one by one, starting with the simplest (e.g., lead nurturing endpoint), ensuring the server starts after each addition.
+        4.  Refactor  by moving logical blocks (e.g., auth, company data, WebSockets) into separate files in a new  directory to improve readability and isolation.
+    -   **Why fix this issue and what will be achieved with the fix?** The backend is the core of the application. Fixing it is critical to unblock all other development and make any feature functional.
+    -   **Status:** IN PROGRESS
+    -   **Is recurring issue?** N
+    -   **Should Test frontend/backend/both after fix?** Backend
+    -   **Blocked on other issue:** None. This is the primary blocker.
+
+-   **Issue 2: Incomplete WebSocket Implementation**
+    -   **Next debug checklist:**
+        1.  After fixing the backend, confirm the Socket.IO server is running.
+        2.  Install  on the frontend.
+        3.  Implement a client-side connection in a React context or the main  component.
+        4.  In , subscribe to new message events and update the component's state to reflect real-time changes.
+    -   **Why fix this issue and what will be achieved with the fix?** Fulfills the user's requirement for a real-time, responsive user experience in the unified inbox.
+    -   **Status:** NOT STARTED
+    -   **Is recurring issue?** N
+    -   **Should Test frontend/backend/both after fix?** Both
+    -   **Blocked on other issue:** Issue 1: Backend Server is Down
+
+-   **Issue 3: Incomplete RAG and Company Data Feature**
+    -   **Next debug checklist:**
+        1.  Build the file upload UI in  under the Company Data tab.
+        2.  Connect the UI to the  endpoint.
+        3.  Fully implement the logic in  to process uploaded files and use them for RAG.
+        4.  Integrate the  into the AI response generation endpoint.
+    -   **Why fix this issue and what will be achieved with the fix?** This is a core requirement for providing personalized, company-aware AI responses.
+    -   **Status:** NOT STARTED
+    -   **Is recurring issue?** N
+    -   **Should Test frontend/backend/both after fix?** Both
+    -   **Blocked on other issue:** Issue 1: Backend Server is Down
+
+-   **Issue 4: Incomplete Lead Nurturing Automation**
+    -   **Next debug checklist:**
+        1.  Implement the backend logic for the  endpoint.
+        2.  Connect the Nurture button in  to this endpoint, providing user feedback on success or failure.
+    -   **Why fix this issue and what will be achieved with the fix?** Implements a key business automation feature requested by the user.
+    -   **Status:** NOT STARTED
+    -   **Is recurring issue?** N
+    -   **Should Test frontend/backend/both after fix?** Both
+    -   **Blocked on other issue:** Issue 1: Backend Server is Down
+
+-   **Issue 5: Incomplete WhatsApp Integration**
+    -   **Next debug checklist:**
+        1.  Finalize and test the  function in .
+        2.  Integrate this function into the main message sending flow.
+        3.  Implement and test the  to correctly process incoming messages.
+    -   **Why fix this issue and what will be achieved with the fix?** Enables one of the primary communication channels for the platform.
+    -   **Status:** NOT STARTED
+    -   **Is recurring issue?** N
+    -   **Should Test frontend/backend/both after fix?** Backend
+    -   **Blocked on other issue:** Issue 1: Backend Server is Down
+
+-   **Issue 6: Maximize Message Inbox Feature Not Started**
+    -   **Next debug checklist:**
+        1.  In , add an  handler to conversation items.
+        2.  Use component state to track the selected or maximized conversation.
+        3.  Implement a modal or an expanding panel that displays the full conversation thread when an item is clicked.
+    -   **Why fix this issue and what will be achieved with the fix?** Improves usability of the inbox as requested by the user.
+    -   **Status:** NOT STARTED
+    -   **Is recurring issue?** N
+    -   **Should Test frontend/backend/both after fix?** Frontend
+    -   **Blocked on other issue:** None.
+
+-   **Issue 7: End-to-End Google Auth Flow Not Verified**
+    -   **Next debug checklist:**
+        1.  Once the backend is fixed, perform a full sign-up and sign-in flow using the Sign in with Google button.
+        2.  Verify that the user is created in the database and the session is correctly established on the frontend.
+    -   **Why fix this issue and what will be achieved with the fix?** Ensures a core authentication mechanism is working correctly after the recent major refactoring.
+    -   **Status:** TESTING PENDING
+    -   **Is recurring issue?** N
+    -   **Should Test frontend/backend/both after fix?** Both
+    -   **Blocked on other issue:** Issue 1: Backend Server is Down
+
+**Upcoming and Future Tasks**
+- **Upcoming Tasks:**
+    - (P1) **Implement Facebook Authentication:** The user requested Google + Facebook auth, but only Google was done. The agent needs to get the integration playbook and implement the full backend and frontend flow for Facebook login.
+- **Future Tasks:**
+    - (P2) **Implement Full 7-Layer Architecture:** The user provided a detailed architecture document. This involves a major refactor to a microservices-style architecture, adding a message queue (RabbitMQ/Redis), API Gateway, caching layer, and enterprise monitoring (ELK, Prometheus).
+    - (P2) **Implement Sentiment Analysis:** Add the logic to analyze message sentiment and display it in the UI, likely in the inbox.
+    - (P2) **Implement Agent Orchestration:** Build the logic for skill-based routing and escalating conversations to human agents.
+
+**Completed work in this session**
+- **Pulse Engine Rebranding & Redesign:**
+  - Created a new landing page ().
+  - Implemented separate, styled Sign In and Sign Up pages.
+  - Built a multi-step registration form to capture company details.
+  - Applied a new, professional light-theme design across the application.
+- **Core Functionality Implemented:**
+  - Implemented backend for Google Authentication ().
+  - Redesigned the unified inbox to a 4-column layout as per user's image reference ().
+
+**Earlier issues found/mentioned but not fixed**
+-   **Issue 1: Facebook Authentication Not Implemented**
+    -   **Debug checklist:** Get the  for Facebook Auth, add backend routes for the OAuth flow, and add a Sign in with Facebook button to the  and .
+    -   **Why to solve this issue and what will be achieved with this?** Fulfills the original user requirement for having multiple social login options.
+    -   **Should Test frontend/backend/both after fix:** Both
+    -   **Is recurring issue?** N
+
+**Known issue recurrence from previous fork**
+- None.
+
+**Code Architecture**
+
+
+**Key Technical Concepts**
+-   **Frontend:** React, TailwindCSS, . Will require .
+-   **Backend:** FastAPI, MongoDB (via ), Pydantic, JWT authentication, Google OAuth2. Recently added  and .
+-   **Architecture:** A monolithic backend () with a React SPA frontend. The immediate goal should be to stabilize this, followed by a planned refactor into a more modular structure.
+
+**key DB schema**
+-   **users:** { , , , , ,  }
+-   **companies:** { , , ,  }
+-   Other collections: , , , .
+
+**changes in tech stack**
+- None. The stack remains React, FastAPI, and MongoDB as per the user's direction.
+
+**All files of reference**
+-   : **Critical.** This file is broken and is the main blocker for all progress. It contains all backend logic.
+-   : The main user-facing feature. Needs WebSocket integration and the maximize feature.
+-   : Needs the UI for the Company Data upload feature.
+-   : A new, incomplete file for implementing RAG.
+-   : Contains the detailed project requirements and history.
+
+**Areas that need refactoring**:
+ is now over 800 lines and unmanageable. It desperately needs to be broken down into smaller, domain-specific routers (e.g., , , ) to make debugging and future development feasible. This should be the first step after stabilizing the server.
+
+**key api endpoints**
+-   
+-   
+-   
+-    (New, Unfinished)
+-    (New, Unfinished)
+-    (New, Unfinished)
+-   Socket.IO events for real-time messaging.
+
+**Critical Info for New Agent**
+-   **Your immediate and highest priority is to fix the backend.** The  file is broken and fails to start. No other progress can be made until this is resolved.
+-   **Adopt a modular approach.** Do not add more code to the monolithic . After getting the server to run, your first major task should be to refactor the existing routes into separate router files.
+-   **Implement features one by one.** The previous agent failed by trying to implement too many complex features at once. Fix the server, then implement and test each pending feature individually: WebSockets, then RAG, etc.
+-   The user has a very ambitious vision. Manage expectations and focus on delivering stable, incremental progress.
+
+**documents and test reports created in this job**
+-   /app/memory/PRD.md
+-   /app/test_reports/iteration_1.json
+-   /app/test_reports/iteration_2.json
+
+**Last 10 User Messages and any pending HUMAN messages**
+-   **User (Message 172):** Requested a large batch of new features: WebSockets for real-time inbox, a maximize message feature, re-checking Google auth, a new WhatsApp endpoint (with credentials), advanced RAG using company data, and lead nurturing automation. This is the source of all current pending work. (IN PROGRESS)
+
+**Project Health Check:**
+-   **Broken:** The entire backend is non-functional.  fails to start, blocking all API calls and dependent features.
+
+**3rd Party Integrations**
+-   **Gemini API:** Uses a User-provided key.
+-   **Google Auth:** Uses Emergent-managed Google Auth.
+-   **WhatsApp:** In-progress integration using a User-provided key.
+-   **Facebook Auth:** Requested by the user but NOT IMPLEMENTED.
+
+**Testing status**
+-   **Testing agent used after significant changes:** YES, but not after the most recent breaking changes.
+-   **Troubleshoot agent used after agent stuck in loop:** NO
+-   **Test files created:** None
+-   **Known regressions:** The entire backend application is down and does not start.
+
+**Credentials to test flow:**
+-   Create new users via the Sign Up page.
+-   Google Auth can be tested via the Sign In page.
+-   WhatsApp and Gemini credentials are in .
+
+**What agent forgot to execute**
+-   **Facebook Authentication:** This was part of the user's original authentication requirements but was never started.
+-   **Incremental Development and Testing:** The agent attempted to implement four major, complex features in a single step without testing, which broke the entire backend.
+-   **Code Refactoring:** The agent continued to build upon a monolithic  file, ignoring best practices that would have mitigated the current blocked state.</analysis>
