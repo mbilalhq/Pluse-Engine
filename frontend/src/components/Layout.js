@@ -24,6 +24,23 @@ export default function Layout({ children }) {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [profileOpen, setProfileOpen] = useState(false);
+  const profileRef = useRef(null);
+
+  // Close profile dropdown on click outside
+  useEffect(() => {
+    function handleClick(e) {
+      if (profileRef.current && !profileRef.current.contains(e.target)) {
+        setProfileOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
+
+  // Close dropdown on route change
+  useEffect(() => {
+    setProfileOpen(false);
+  }, [location.pathname]);
 
   const handleLogout = () => {
     logout();
