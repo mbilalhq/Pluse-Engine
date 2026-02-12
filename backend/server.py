@@ -34,7 +34,7 @@ sio = socketio.AsyncServer(
 )
 
 fastapi_app = FastAPI(title="Pulse Engine AI Platform")
-app = socketio.ASGIApp(sio, other_app=fastapi_app)
+app = socketio.ASGIApp(sio, other_asgi_app=fastapi_app)
 
 fastapi_app.add_middleware(
     CORSMiddleware,
