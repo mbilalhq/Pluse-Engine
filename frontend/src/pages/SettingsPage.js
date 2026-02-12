@@ -516,6 +516,114 @@ export default function SettingsPage() {
               </div>
             </div>
           )}
+
+          {/* Company Data Tab */}
+          {activeTab === 'company-data' && (
+            <div className="space-y-6" data-testid="company-data-settings">
+              <div>
+                <h2 className="text-lg font-semibold text-slate-900 mb-1">Company Products & FAQs</h2>
+                <p className="text-sm text-slate-400">This data feeds into the AI to provide accurate, personalized responses to your customers.</p>
+              </div>
+
+              {/* Products Section */}
+              <div className="bg-white border border-slate-100 rounded-xl p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <Package size={16} className="text-blue-600" />
+                    <h3 className="text-sm font-semibold text-slate-900">Products & Services ({products.length})</h3>
+                  </div>
+                  <button onClick={() => setShowProductForm(true)} className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-medium hover:bg-blue-700 transition-colors" data-testid="add-product-btn">
+                    <Plus size={12} /> Add Product
+                  </button>
+                </div>
+                <div className="space-y-2">
+                  {products.map(p => (
+                    <div key={p.id} className="flex items-start justify-between p-3 bg-slate-50 rounded-lg border border-slate-100" data-testid={`product-${p.id}`}>
+                      <div>
+                        <h4 className="text-sm font-medium text-slate-800">{p.name}</h4>
+                        <p className="text-xs text-slate-500 mt-0.5">{p.description}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          {p.price && <span className="text-[10px] px-1.5 py-0.5 rounded bg-green-50 text-green-600 border border-green-200 font-medium">{p.price}</span>}
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-500">{p.category}</span>
+                        </div>
+                      </div>
+                      <button onClick={() => deleteProduct(p.id)} className="text-slate-400 hover:text-red-500 p-1"><Trash2 size={14} /></button>
+                    </div>
+                  ))}
+                  {products.length === 0 && <p className="text-center text-slate-400 text-sm py-4">No products added yet. Add products so AI can answer customer queries accurately.</p>}
+                </div>
+              </div>
+
+              {/* FAQs Section */}
+              <div className="bg-white border border-slate-100 rounded-xl p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <HelpCircle size={16} className="text-blue-600" />
+                    <h3 className="text-sm font-semibold text-slate-900">FAQs ({faqs.length})</h3>
+                  </div>
+                  <button onClick={() => setShowFaqForm(true)} className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-medium hover:bg-blue-700 transition-colors" data-testid="add-faq-btn">
+                    <Plus size={12} /> Add FAQ
+                  </button>
+                </div>
+                <div className="space-y-2">
+                  {faqs.map(f => (
+                    <div key={f.id} className="flex items-start justify-between p-3 bg-slate-50 rounded-lg border border-slate-100" data-testid={`faq-${f.id}`}>
+                      <div>
+                        <h4 className="text-sm font-medium text-slate-800">Q: {f.question}</h4>
+                        <p className="text-xs text-slate-500 mt-0.5">A: {f.answer}</p>
+                      </div>
+                      <button onClick={() => deleteFaq(f.id)} className="text-slate-400 hover:text-red-500 p-1"><Trash2 size={14} /></button>
+                    </div>
+                  ))}
+                  {faqs.length === 0 && <p className="text-center text-slate-400 text-sm py-4">No FAQs added yet. Add FAQs so AI can instantly answer common questions.</p>}
+                </div>
+              </div>
+
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                <div className="flex items-start gap-3">
+                  <Bot size={16} className="text-blue-600 mt-0.5" />
+                  <div>
+                    <h4 className="text-sm font-medium text-blue-800">How this works</h4>
+                    <p className="text-xs text-blue-600 mt-1 leading-relaxed">Products and FAQs you add here are automatically used by the AI when responding to customer messages. The AI references this data to provide accurate, brand-consistent answers about your products, pricing, features, and policies.</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Product Form Modal */}
+              {showProductForm && (
+                <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                  <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-lg p-6">
+                    <div className="flex items-center justify-between mb-4"><h3 className="text-lg font-bold text-slate-900">Add Product</h3><button onClick={() => setShowProductForm(false)} className="text-slate-400 hover:text-slate-600"><X size={20} /></button></div>
+                    <div className="space-y-3">
+                      <input value={productForm.name} onChange={(e) => setProductForm({...productForm, name: e.target.value})} placeholder="Product Name *" className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" data-testid="product-name-input" required />
+                      <textarea value={productForm.description} onChange={(e) => setProductForm({...productForm, description: e.target.value})} placeholder="Description - what does this product do?" rows={3} className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-none" data-testid="product-desc-input" />
+                      <div className="grid grid-cols-2 gap-3">
+                        <input value={productForm.price} onChange={(e) => setProductForm({...productForm, price: e.target.value})} placeholder="Price (e.g. $99/mo)" className="px-3 py-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" data-testid="product-price-input" />
+                        <select value={productForm.category} onChange={(e) => setProductForm({...productForm, category: e.target.value})} className="px-3 py-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
+                          <option value="general">General</option><option value="software">Software</option><option value="service">Service</option><option value="subscription">Subscription</option><option value="hardware">Hardware</option>
+                        </select>
+                      </div>
+                      <button onClick={createProduct} className="w-full py-2.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700" data-testid="save-product-btn">Add Product</button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* FAQ Form Modal */}
+              {showFaqForm && (
+                <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                  <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-lg p-6">
+                    <div className="flex items-center justify-between mb-4"><h3 className="text-lg font-bold text-slate-900">Add FAQ</h3><button onClick={() => setShowFaqForm(false)} className="text-slate-400 hover:text-slate-600"><X size={20} /></button></div>
+                    <div className="space-y-3">
+                      <input value={faqForm.question} onChange={(e) => setFaqForm({...faqForm, question: e.target.value})} placeholder="Question *" className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" data-testid="faq-question-input" required />
+                      <textarea value={faqForm.answer} onChange={(e) => setFaqForm({...faqForm, answer: e.target.value})} placeholder="Answer *" rows={3} className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-none" data-testid="faq-answer-input" required />
+                      <button onClick={createFaq} className="w-full py-2.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700" data-testid="save-faq-btn">Add FAQ</button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
