@@ -56,7 +56,7 @@ class PulseEngineAPITester:
         
         # Test login with admin credentials
         success, status, data = self.make_request('POST', 'auth/login', {
-            'email': 'admin@nexusengage.com',
+            'email': 'admin@pulseengine.com',
             'password': 'admin123'
         })
         
