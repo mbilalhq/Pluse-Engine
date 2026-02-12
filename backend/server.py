@@ -8,6 +8,7 @@ import uuid
 import logging
 import os
 import httpx
+import socketio
 
 from database import db
 from auth_utils import (
@@ -17,15 +18,25 @@ from auth_utils import (
 )
 from ai_service import (
     generate_ai_response, analyze_sentiment, classify_intent,
-    generate_lead_score, summarize_conversation, calculate_churn_risk
+    generate_lead_score, summarize_conversation, calculate_churn_risk,
+    generate_nurture_message, get_company_knowledge
 )
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title="Pulse Engine AI Platform")
+# ─── SOCKET.IO SETUP ──────────────────────────────────────────
+sio = socketio.AsyncServer(
+    async_mode='asgi',
+    cors_allowed_origins='*',
+    logger=False,
+    engineio_logger=False
+)
 
-app.add_middleware(
+fastapi_app = FastAPI(title="Pulse Engine AI Platform")
+app = socketio.ASGIApp(sio, other_app=fastapi_app)
+
+fastapi_app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
     allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
