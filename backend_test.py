@@ -334,7 +334,7 @@ class PulseEngineAPITester:
 
     def run_all_tests(self):
         """Run all API tests"""
-        print("🚀 Starting NexusEngage API Tests...")
+        print("🚀 Starting Pulse Engine API Tests...")
         print(f"🌐 Backend URL: {self.base_url}")
         print("=" * 60)
         
