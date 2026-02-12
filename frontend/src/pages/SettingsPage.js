@@ -26,6 +26,12 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState('');
   const [showTemplateForm, setShowTemplateForm] = useState(false);
   const [templateForm, setTemplateForm] = useState({ name: '', content: '', category: 'general', channel: 'all' });
+  const [products, setProducts] = useState([]);
+  const [faqs, setFaqs] = useState([]);
+  const [showProductForm, setShowProductForm] = useState(false);
+  const [showFaqForm, setShowFaqForm] = useState(false);
+  const [productForm, setProductForm] = useState({ name: '', description: '', price: '', category: 'general' });
+  const [faqForm, setFaqForm] = useState({ question: '', answer: '', category: 'general' });
 
   useEffect(() => {
     loadSettings();
@@ -33,16 +39,20 @@ export default function SettingsPage() {
 
   const loadSettings = async () => {
     try {
-      const [ch, co, us, tm] = await Promise.all([
+      const [ch, co, us, tm, pr, fq] = await Promise.all([
         api.get('/settings/channels'),
         api.get('/settings/company'),
         api.get('/users'),
         api.get('/settings/templates'),
+        api.get('/company-data/products').catch(() => ({ data: [] })),
+        api.get('/company-data/faqs').catch(() => ({ data: [] })),
       ]);
       setChannels(ch.data);
       setCompany(co.data);
       setUsers(us.data);
       setTemplates(tm.data);
+      setProducts(pr.data);
+      setFaqs(fq.data);
     } catch (err) { console.error(err); }
   };
 
