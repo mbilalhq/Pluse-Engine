@@ -1,65 +1,49 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --bg-tertiary: #f1f5f9;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --border: #e2e8f0;
+  --accent: #2563eb;
+  --accent-light: #dbeafe;
+}
+
 body {
   margin: 0;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  background: var(--bg-primary);
+  color: var(--text-primary);
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: 'DM Sans', sans-serif;
 }
 
 code, .font-mono {
   font-family: 'JetBrains Mono', monospace;
 }
 
-@layer base {
-  :root {
-    --background: 222 47% 3%;
-    --foreground: 210 20% 98%;
-    --card: 220 26% 7%;
-    --card-foreground: 210 20% 98%;
-    --popover: 220 26% 7%;
-    --popover-foreground: 210 20% 98%;
-    --primary: 263 70% 58%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 218 23% 16%;
-    --secondary-foreground: 210 20% 98%;
-    --muted: 218 23% 16%;
-    --muted-foreground: 215 16% 62%;
-    --accent: 218 23% 16%;
-    --accent-foreground: 210 20% 98%;
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 210 20% 98%;
-    --border: 218 23% 16%;
-    --input: 218 23% 16%;
-    --ring: 263 70% 58%;
-    --chart-1: 263 70% 58%;
-    --chart-2: 187 74% 44%;
-    --chart-3: 160 60% 45%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 0 84% 60%;
-    --radius: 0.5rem;
-  }
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
 }
 
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
-}
-
-@layer base {
-  [data-debug-wrapper="true"] {
-    display: contents !important;
-  }
+::selection {
+  background: rgba(37, 99, 235, 0.15);
 }
