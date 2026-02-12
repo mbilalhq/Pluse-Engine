@@ -4,7 +4,7 @@ import api from '@/lib/api';
 import {
   Settings, Shield, Users, Bell, Palette, Key, Globe, Bot,
   Save, Plus, X, Trash2, Eye, EyeOff, Check, AlertCircle,
-  MessageSquare
+  MessageSquare, Package, HelpCircle, Database
 } from 'lucide-react';
 
 const CHANNEL_CONFIG = {
