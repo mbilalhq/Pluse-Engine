@@ -1,38 +1,45 @@
 import { useState, useEffect, useRef } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
 import api from '@/lib/api';
 import {
-  Send, Bot, UserCircle, Search, Filter, Sparkles, Phone, Mail,
-  Hash, MessageSquare, ChevronRight, Smile, Frown, Meh,
-  MoreVertical, Tag, ArrowRightLeft, Clock
+  Send, Bot, Search, Sparkles, Phone, Mail, Tag,
+  MessageSquare, Smile, Frown, Meh, UserCircle, X
 } from 'lucide-react';
 
-const CHANNEL_ICONS = {
-  whatsapp: { bg: 'bg-emerald-500/20', text: 'text-emerald-400', label: 'WhatsApp' },
-  instagram: { bg: 'bg-pink-500/20', text: 'text-pink-400', label: 'Instagram' },
-  facebook: { bg: 'bg-blue-500/20', text: 'text-blue-400', label: 'Facebook' },
-  web_chat: { bg: 'bg-violet-500/20', text: 'text-violet-400', label: 'Web Chat' },
-  twitter: { bg: 'bg-sky-500/20', text: 'text-sky-400', label: 'Twitter/X' },
+const CHANNELS = [
+  { key: 'whatsapp', label: 'WhatsApp', color: 'bg-emerald-500', lightBg: 'bg-emerald-50', text: 'text-emerald-600', border: 'border-emerald-200' },
+  { key: 'facebook', label: 'Facebook', color: 'bg-blue-500', lightBg: 'bg-blue-50', text: 'text-blue-600', border: 'border-blue-200' },
+  { key: 'instagram', label: 'Instagram', color: 'bg-pink-500', lightBg: 'bg-pink-50', text: 'text-pink-600', border: 'border-pink-200' },
+  { key: 'web_chat', label: 'Website', color: 'bg-violet-500', lightBg: 'bg-violet-50', text: 'text-violet-600', border: 'border-violet-200' },
+];
+
+const TAG_COLORS = {
+  pricing: 'bg-amber-50 text-amber-600 border-amber-200',
+  sales: 'bg-green-50 text-green-600 border-green-200',
+  vip: 'bg-purple-50 text-purple-600 border-purple-200',
+  support: 'bg-blue-50 text-blue-600 border-blue-200',
+  billing: 'bg-red-50 text-red-600 border-red-200',
+  complaint: 'bg-red-50 text-red-600 border-red-200',
+  technical: 'bg-cyan-50 text-cyan-600 border-cyan-200',
+  api: 'bg-slate-100 text-slate-600 border-slate-200',
+  'feature-request': 'bg-indigo-50 text-indigo-600 border-indigo-200',
+  escalated: 'bg-orange-50 text-orange-600 border-orange-200',
 };
 
-const SENTIMENT_ICONS = { happy: Smile, satisfied: Smile, neutral: Meh, frustrated: Frown, angry: Frown };
+function getTagColor(tag) {
+  return TAG_COLORS[tag] || 'bg-slate-50 text-slate-500 border-slate-200';
+}
 
 export default function InboxPage() {
-  const { user } = useAuth();
   const [conversations, setConversations] = useState([]);
   const [selectedConvo, setSelectedConvo] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterChannel, setFilterChannel] = useState('');
   const [sending, setSending] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
   const [customerInfo, setCustomerInfo] = useState(null);
   const messagesEndRef = useRef(null);
 
-  useEffect(() => {
-    loadConversations();
-  }, [filterChannel, searchTerm]);
+  useEffect(() => { loadConversations(); }, []);
 
   useEffect(() => {
     if (selectedConvo) {
@@ -43,18 +50,12 @@ export default function InboxPage() {
     }
   }, [selectedConvo?.id]);
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
 
   const loadConversations = async () => {
     try {
-      const params = {};
-      if (filterChannel) params.channel = filterChannel;
-      if (searchTerm) params.search = searchTerm;
-      const res = await api.get('/conversations', { params });
+      const res = await api.get('/conversations');
       setConversations(res.data);
-      if (!selectedConvo && res.data.length > 0) setSelectedConvo(res.data[0]);
     } catch (err) { console.error(err); }
   };
 
@@ -69,10 +70,7 @@ export default function InboxPage() {
     if (!newMessage.trim() || !selectedConvo || sending) return;
     setSending(true);
     try {
-      const res = await api.post(`/conversations/${selectedConvo.id}/messages`, {
-        content: newMessage,
-        sender_type: 'agent',
-      });
+      const res = await api.post(`/conversations/${selectedConvo.id}/messages`, { content: newMessage, sender_type: 'agent' });
       setMessages(prev => [...prev, res.data.message]);
       setNewMessage('');
       loadConversations();
@@ -91,128 +89,123 @@ export default function InboxPage() {
     finally { setAiLoading(false); }
   };
 
-  const SentimentIcon = selectedConvo ? (SENTIMENT_ICONS[selectedConvo.sentiment_label] || Meh) : Meh;
+  // Group conversations by channel
+  const grouped = {};
+  CHANNELS.forEach(ch => { grouped[ch.key] = []; });
+  conversations.forEach(c => {
+    if (grouped[c.channel]) grouped[c.channel].push(c);
+    else if (grouped.web_chat) grouped.web_chat.push(c);
+  });
 
   return (
-    <div className="flex h-[calc(100vh-4rem)]" data-testid="inbox-page">
-      {/* Conversation List */}
-      <div className="w-80 flex-shrink-0 border-r border-gray-800/60 flex flex-col bg-[#0a0f1a]">
-        <div className="p-4 border-b border-gray-800/60 space-y-3">
-          <h2 className="text-lg font-semibold text-white">Inbox</h2>
-          <div className="relative">
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-            <input
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search conversations..."
-              className="w-full pl-9 pr-3 py-2 bg-gray-800/50 border border-gray-700/50 rounded-lg text-xs text-gray-300 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-violet-500/50"
-              data-testid="inbox-search-input"
-            />
-          </div>
-          <div className="flex gap-1 overflow-x-auto">
-            <button onClick={() => setFilterChannel('')} className={`px-2.5 py-1 text-[10px] rounded-md font-medium whitespace-nowrap transition-colors ${!filterChannel ? 'bg-violet-500/20 text-violet-400 border border-violet-500/30' : 'text-gray-500 hover:text-gray-300 border border-transparent'}`} data-testid="filter-all">All</button>
-            {Object.entries(CHANNEL_ICONS).map(([ch, info]) => (
-              <button key={ch} onClick={() => setFilterChannel(ch)} className={`px-2.5 py-1 text-[10px] rounded-md font-medium whitespace-nowrap transition-colors ${filterChannel === ch ? `${info.bg} ${info.text} border border-current/30` : 'text-gray-500 hover:text-gray-300 border border-transparent'}`} data-testid={`filter-${ch}`}>
-                {info.label}
-              </button>
-            ))}
-          </div>
-        </div>
-        <div className="flex-1 overflow-y-auto" data-testid="conversation-list">
-          {conversations.map((convo) => {
-            const ch = CHANNEL_ICONS[convo.channel] || CHANNEL_ICONS.web_chat;
-            const active = selectedConvo?.id === convo.id;
+    <div className="flex h-[calc(100vh-3.5rem)]" data-testid="inbox-page">
+      {/* Left: 4-Column Channel View */}
+      <div className={`${selectedConvo ? 'w-[55%]' : 'flex-1'} flex-shrink-0 overflow-x-auto border-r border-slate-100 bg-slate-50`}>
+        <div className="flex h-full min-w-[800px]" data-testid="channel-columns">
+          {CHANNELS.map((ch) => {
+            const items = grouped[ch.key] || [];
             return (
-              <button
-                key={convo.id}
-                onClick={() => setSelectedConvo(convo)}
-                className={`w-full text-left p-4 border-b border-gray-800/40 hover:bg-gray-800/30 transition-colors ${active ? 'bg-violet-500/10 border-l-2 border-l-violet-500' : ''}`}
-                data-testid={`convo-item-${convo.id}`}
-              >
-                <div className="flex items-start gap-3">
-                  <div className={`w-9 h-9 rounded-full ${ch.bg} flex items-center justify-center text-xs font-bold ${ch.text} flex-shrink-0`}>
-                    {convo.customer_name?.charAt(0)}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-gray-200 truncate">{convo.customer_name}</span>
-                      {convo.unread_count > 0 && (
-                        <span className="w-5 h-5 rounded-full bg-violet-500 text-[10px] font-bold text-white flex items-center justify-center">{convo.unread_count}</span>
-                      )}
-                    </div>
-                    <p className="text-xs text-gray-500 truncate mt-0.5">{convo.last_message}</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className={`text-[10px] px-1.5 py-0.5 rounded ${ch.bg} ${ch.text}`}>{ch.label}</span>
-                      {convo.ai_handled && <span className="text-[10px] px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-400">AI</span>}
-                    </div>
-                  </div>
+              <div key={ch.key} className="flex-1 flex flex-col border-r border-slate-100 last:border-r-0 min-w-[200px]" data-testid={`channel-col-${ch.key}`}>
+                {/* Column Header */}
+                <div className={`px-4 py-3 border-b border-slate-100 bg-white flex items-center gap-2`}>
+                  <div className={`w-2.5 h-2.5 rounded-full ${ch.color}`}></div>
+                  <span className="text-[13px] font-semibold text-slate-800">{ch.label}</span>
+                  <span className="ml-auto text-[11px] font-medium text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">{items.length}</span>
                 </div>
-              </button>
+                {/* Cards */}
+                <div className="flex-1 overflow-y-auto p-2 space-y-2">
+                  {items.map(convo => {
+                    const isActive = selectedConvo?.id === convo.id;
+                    return (
+                      <div
+                        key={convo.id}
+                        onClick={() => setSelectedConvo(convo)}
+                        className={`bg-white rounded-xl p-3.5 border cursor-pointer transition-all duration-150 hover:shadow-md ${isActive ? `${ch.border} shadow-md ring-1 ring-blue-100` : 'border-slate-100 hover:border-slate-200'}`}
+                        data-testid={`convo-card-${convo.id}`}
+                      >
+                        <div className="flex items-start gap-2.5 mb-2">
+                          <div className={`w-8 h-8 rounded-full ${ch.lightBg} flex items-center justify-center text-xs font-bold ${ch.text} flex-shrink-0`}>
+                            {convo.customer_name?.charAt(0)}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between">
+                              <span className="text-[13px] font-semibold text-slate-800 truncate">{convo.customer_name}</span>
+                              {convo.unread_count > 0 && (
+                                <span className="w-4.5 h-4.5 min-w-[18px] rounded-full bg-blue-500 text-[9px] font-bold text-white flex items-center justify-center">{convo.unread_count}</span>
+                              )}
+                            </div>
+                            <p className="text-[11px] text-slate-400 mt-0.5">
+                              {new Date(convo.last_message_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </p>
+                          </div>
+                        </div>
+                        <p className="text-xs text-slate-500 line-clamp-2 mb-2 leading-relaxed">{convo.last_message}</p>
+                        <div className="flex flex-wrap gap-1">
+                          {(convo.tags || []).slice(0, 3).map(tag => (
+                            <span key={tag} className={`text-[10px] px-1.5 py-0.5 rounded-md border font-medium ${getTagColor(tag)}`}>{tag}</span>
+                          ))}
+                          {convo.ai_handled && <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-purple-50 text-purple-600 border border-purple-200 font-medium">AI</span>}
+                        </div>
+                      </div>
+                    );
+                  })}
+                  {items.length === 0 && (
+                    <div className="text-center py-8 text-slate-300">
+                      <MessageSquare size={24} className="mx-auto mb-2 opacity-40" />
+                      <p className="text-xs">No conversations</p>
+                    </div>
+                  )}
+                </div>
+              </div>
             );
           })}
-          {conversations.length === 0 && (
-            <div className="p-8 text-center text-gray-500 text-sm">No conversations found</div>
-          )}
         </div>
       </div>
 
-      {/* Message Thread */}
-      {selectedConvo ? (
-        <div className="flex-1 flex flex-col min-w-0">
+      {/* Right: Message Thread + Customer */}
+      {selectedConvo && (
+        <div className="flex-1 flex flex-col min-w-0 bg-white">
           {/* Thread Header */}
-          <div className="h-16 px-6 flex items-center justify-between border-b border-gray-800/60 bg-[#030712]/50">
+          <div className="h-14 px-5 flex items-center justify-between border-b border-slate-100">
             <div className="flex items-center gap-3">
-              <div className={`w-9 h-9 rounded-full ${CHANNEL_ICONS[selectedConvo.channel]?.bg} flex items-center justify-center text-sm font-bold ${CHANNEL_ICONS[selectedConvo.channel]?.text}`}>
+              <div className={`w-9 h-9 rounded-full ${CHANNELS.find(c => c.key === selectedConvo.channel)?.lightBg || 'bg-slate-100'} flex items-center justify-center text-sm font-bold ${CHANNELS.find(c => c.key === selectedConvo.channel)?.text || 'text-slate-600'}`}>
                 {selectedConvo.customer_name?.charAt(0)}
               </div>
               <div>
-                <h3 className="text-sm font-semibold text-white">{selectedConvo.customer_name}</h3>
-                <p className="text-xs text-gray-500">{selectedConvo.subject} · {CHANNEL_ICONS[selectedConvo.channel]?.label}</p>
+                <h3 className="text-sm font-semibold text-slate-900">{selectedConvo.customer_name}</h3>
+                <p className="text-[11px] text-slate-400">{selectedConvo.subject}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <span className={`text-xs px-2 py-1 rounded-md font-medium flex items-center gap-1 ${selectedConvo.sentiment_score > 0.3 ? 'bg-emerald-500/10 text-emerald-400' : selectedConvo.sentiment_score < -0.3 ? 'bg-red-500/10 text-red-400' : 'bg-gray-700/50 text-gray-400'}`}>
-                <SentimentIcon size={12} /> {selectedConvo.sentiment_label}
+              <span className={`text-[11px] px-2 py-0.5 rounded-md font-medium border ${selectedConvo.sentiment_score > 0.3 ? 'bg-green-50 text-green-600 border-green-200' : selectedConvo.sentiment_score < -0.3 ? 'bg-red-50 text-red-600 border-red-200' : 'bg-slate-50 text-slate-500 border-slate-200'}`}>
+                {selectedConvo.sentiment_label}
               </span>
-              <span className={`text-xs px-2 py-1 rounded-md font-medium ${selectedConvo.priority === 'critical' ? 'bg-red-500/10 text-red-400' : selectedConvo.priority === 'high' ? 'bg-amber-500/10 text-amber-400' : 'bg-gray-700/50 text-gray-400'}`}>
-                {selectedConvo.priority}
-              </span>
+              <button onClick={() => setSelectedConvo(null)} className="p-1 rounded hover:bg-slate-100 text-slate-400">
+                <X size={16} />
+              </button>
             </div>
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-4" data-testid="message-thread">
+          <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3 bg-slate-50/50" data-testid="message-thread">
             {messages.map((msg) => {
-              const isAgent = msg.sender_type === 'agent';
-              const isAI = msg.sender_type === 'ai';
               const isCustomer = msg.sender_type === 'customer';
+              const isAI = msg.sender_type === 'ai';
               return (
-                <div key={msg.id} className={`flex ${isCustomer ? 'justify-start' : 'justify-end'}`} data-testid={`message-${msg.id}`}>
-                  <div className={`max-w-[70%] ${isCustomer ? '' : ''}`}>
-                    <div className="flex items-center gap-2 mb-1">
-                      {isCustomer && <UserCircle size={14} className="text-gray-500" />}
-                      {isAI && <Bot size={14} className="text-purple-400" />}
-                      <span className="text-[10px] text-gray-500">{msg.sender_name}</span>
-                      <span className="text-[10px] text-gray-600">{new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                      {isAI && msg.ai_confidence && (
-                        <span className="text-[10px] px-1 py-0.5 rounded bg-purple-500/10 text-purple-400">{Math.round(msg.ai_confidence * 100)}% conf</span>
-                      )}
+                <div key={msg.id} className={`flex ${isCustomer ? 'justify-start' : 'justify-end'}`} data-testid={`msg-${msg.id}`}>
+                  <div className={`max-w-[75%]`}>
+                    <div className={`flex items-center gap-1.5 mb-1 ${isCustomer ? '' : 'justify-end'}`}>
+                      <span className="text-[10px] text-slate-400 font-medium">{msg.sender_name}</span>
+                      <span className="text-[10px] text-slate-300">{new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                      {isAI && <span className="text-[10px] px-1 py-0.5 rounded bg-purple-50 text-purple-500 font-medium">AI</span>}
                     </div>
-                    <div className={`px-4 py-3 rounded-2xl text-sm leading-relaxed ${
-                      isCustomer ? 'bg-gray-800/60 text-gray-200 rounded-tl-md' :
-                      isAI ? 'bg-purple-500/15 text-gray-200 border border-purple-500/20 rounded-tr-md' :
-                      'bg-violet-600/20 text-gray-200 border border-violet-500/20 rounded-tr-md'
+                    <div className={`px-3.5 py-2.5 rounded-2xl text-sm leading-relaxed ${
+                      isCustomer ? 'bg-white border border-slate-200 text-slate-700 rounded-bl-md' :
+                      isAI ? 'bg-purple-50 text-slate-700 border border-purple-100 rounded-br-md' :
+                      'bg-blue-600 text-white rounded-br-md'
                     }`}>
-                      {isAI && <Sparkles size={12} className="inline-block text-purple-400 mr-1" />}
                       {msg.content}
                     </div>
-                    {msg.sentiment && (
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className={`text-[10px] px-1.5 py-0.5 rounded ${msg.sentiment.score > 0.3 ? 'bg-emerald-500/10 text-emerald-400' : msg.sentiment.score < -0.3 ? 'bg-red-500/10 text-red-400' : 'bg-gray-800 text-gray-500'}`}>
-                          {msg.sentiment.emotion} ({msg.sentiment.score?.toFixed(1)})
-                        </span>
-                      </div>
-                    )}
                   </div>
                 </div>
               );
@@ -221,120 +214,22 @@ export default function InboxPage() {
           </div>
 
           {/* Compose */}
-          <div className="p-4 border-t border-gray-800/60 bg-[#030712]/50">
-            <div className="flex items-center gap-3">
-              <button
-                onClick={triggerAI}
-                disabled={aiLoading}
-                className="p-2.5 rounded-lg bg-purple-500/10 border border-purple-500/30 text-purple-400 hover:bg-purple-500/20 transition-colors disabled:opacity-50"
-                title="Generate AI Response"
-                data-testid="ai-respond-btn"
-              >
-                {aiLoading ? <div className="w-5 h-5 border-2 border-purple-400 border-t-transparent rounded-full animate-spin"></div> : <Sparkles size={18} />}
+          <div className="px-5 py-3 border-t border-slate-100 bg-white">
+            <div className="flex items-center gap-2">
+              <button onClick={triggerAI} disabled={aiLoading} className="p-2 rounded-lg bg-purple-50 border border-purple-200 text-purple-500 hover:bg-purple-100 transition-colors disabled:opacity-50" title="AI Response" data-testid="ai-respond-btn">
+                {aiLoading ? <div className="w-4 h-4 border-2 border-purple-400 border-t-transparent rounded-full animate-spin"></div> : <Sparkles size={16} />}
               </button>
-              <div className="flex-1 relative">
-                <input
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
-                  placeholder="Type a message..."
-                  className="w-full px-4 py-3 bg-gray-800/50 border border-gray-700/50 rounded-xl text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-violet-500/50 pr-12"
-                  data-testid="message-input"
-                />
-              </div>
-              <button
-                onClick={sendMessage}
-                disabled={!newMessage.trim() || sending}
-                className="p-3 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white hover:from-violet-500 hover:to-fuchsia-500 transition-all shadow-lg shadow-violet-500/20 disabled:opacity-50"
-                data-testid="send-message-btn"
-              >
-                <Send size={18} />
+              <input
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
+                placeholder="Type a message..."
+                className="flex-1 px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                data-testid="message-input"
+              />
+              <button onClick={sendMessage} disabled={!newMessage.trim() || sending} className="p-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition-colors disabled:opacity-50 shadow-sm" data-testid="send-message-btn">
+                <Send size={16} />
               </button>
-            </div>
-          </div>
-        </div>
-      ) : (
-        <div className="flex-1 flex items-center justify-center text-gray-500">
-          <div className="text-center">
-            <MessageSquare size={48} className="mx-auto mb-4 opacity-30" />
-            <p className="text-lg font-medium">Select a conversation</p>
-            <p className="text-sm">Choose from the list to start messaging</p>
-          </div>
-        </div>
-      )}
-
-      {/* Customer Sidebar */}
-      {selectedConvo && customerInfo && (
-        <div className="w-72 flex-shrink-0 border-l border-gray-800/60 bg-[#0a0f1a] overflow-y-auto" data-testid="customer-sidebar">
-          <div className="p-5">
-            <div className="text-center mb-6">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-600 mx-auto flex items-center justify-center text-xl font-bold text-white mb-3">
-                {customerInfo.name?.charAt(0)}
-              </div>
-              <h4 className="text-sm font-semibold text-white">{customerInfo.name}</h4>
-              <p className="text-xs text-gray-500">{customerInfo.company}</p>
-              <span className={`inline-block mt-2 text-[10px] px-2 py-0.5 rounded-full font-medium ${customerInfo.segment === 'vip' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30' : customerInfo.segment === 'enterprise' ? 'bg-violet-500/10 text-violet-400 border border-violet-500/30' : 'bg-gray-800 text-gray-400 border border-gray-700'}`}>
-                {customerInfo.segment}
-              </span>
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <p className="text-[10px] text-gray-500 uppercase tracking-wider mb-2">Contact</p>
-                <div className="space-y-2">
-                  {customerInfo.email && <p className="text-xs text-gray-300 flex items-center gap-2"><Mail size={12} className="text-gray-500" /> {customerInfo.email}</p>}
-                  {customerInfo.phone && <p className="text-xs text-gray-300 flex items-center gap-2"><Phone size={12} className="text-gray-500" /> {customerInfo.phone}</p>}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="bg-gray-800/30 rounded-lg p-3 text-center">
-                  <p className="text-lg font-bold text-white">{customerInfo.total_conversations}</p>
-                  <p className="text-[10px] text-gray-500">Conversations</p>
-                </div>
-                <div className="bg-gray-800/30 rounded-lg p-3 text-center">
-                  <p className="text-lg font-bold text-white">${(customerInfo.lifetime_value / 1000).toFixed(0)}k</p>
-                  <p className="text-[10px] text-gray-500">Lifetime Value</p>
-                </div>
-              </div>
-
-              {customerInfo.churn_risk && (
-                <div>
-                  <p className="text-[10px] text-gray-500 uppercase tracking-wider mb-2">Churn Risk</p>
-                  <div className={`p-3 rounded-lg border ${customerInfo.churn_risk.risk_level === 'critical' ? 'bg-red-500/10 border-red-500/30' : customerInfo.churn_risk.risk_level === 'high' ? 'bg-amber-500/10 border-amber-500/30' : 'bg-gray-800/30 border-gray-700/50'}`}>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-medium capitalize text-gray-300">{customerInfo.churn_risk.risk_level}</span>
-                      <span className="text-xs font-bold text-gray-200">{Math.round(customerInfo.churn_risk.risk_score * 100)}%</span>
-                    </div>
-                    <div className="h-1.5 bg-gray-800 rounded-full overflow-hidden">
-                      <div className={`h-full rounded-full ${customerInfo.churn_risk.risk_score > 0.7 ? 'bg-red-500' : customerInfo.churn_risk.risk_score > 0.3 ? 'bg-amber-500' : 'bg-emerald-500'}`} style={{ width: `${customerInfo.churn_risk.risk_score * 100}%` }}></div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              <div>
-                <p className="text-[10px] text-gray-500 uppercase tracking-wider mb-2">Channels</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {(customerInfo.channels || []).map((ch) => {
-                    const info = CHANNEL_ICONS[ch] || CHANNEL_ICONS.web_chat;
-                    return (
-                      <span key={ch} className={`text-[10px] px-2 py-0.5 rounded ${info.bg} ${info.text}`}>{info.label}</span>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div>
-                <p className="text-[10px] text-gray-500 uppercase tracking-wider mb-2">Tags</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {(customerInfo.tags || []).map((tag) => (
-                    <span key={tag} className="text-[10px] px-2 py-0.5 rounded bg-gray-800 text-gray-400 border border-gray-700">
-                      <Tag size={8} className="inline mr-1" />{tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
             </div>
           </div>
         </div>
