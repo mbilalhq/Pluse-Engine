@@ -46,6 +46,52 @@ fastapi_app.add_middleware(
 
 api = APIRouter(prefix="/api")
 
+WHATSAPP_PHONE_ID = os.environ.get('WHATSAPP_PHONE_NUMBER_ID', '')
+WHATSAPP_TOKEN = os.environ.get('WHATSAPP_ACCESS_TOKEN', '')
+
+
+# ─── SOCKET.IO EVENTS ─────────────────────────────────────────
+connected_users = {}
+
+@sio.event
+async def connect(sid, environ):
+    logger.info(f"Socket connected: {sid}")
+
+@sio.event
+async def disconnect(sid):
+    # Remove from connected users
+    for uid, s in list(connected_users.items()):
+        if s == sid:
+            del connected_users[uid]
+    logger.info(f"Socket disconnected: {sid}")
+
+@sio.event
+async def join(sid, data):
+    user_id = data.get('user_id', '')
+    if user_id:
+        connected_users[user_id] = sid
+        logger.info(f"User {user_id} joined as {sid}")
+
+@sio.event
+async def join_conversation(sid, data):
+    convo_id = data.get('conversation_id', '')
+    if convo_id:
+        await sio.enter_room(sid, f"convo_{convo_id}")
+
+@sio.event
+async def leave_conversation(sid, data):
+    convo_id = data.get('conversation_id', '')
+    if convo_id:
+        await sio.leave_room(sid, f"convo_{convo_id}")
+
+async def emit_new_message(conversation_id: str, message: dict):
+    """Broadcast new message to all users in the conversation room"""
+    try:
+        await sio.emit('new_message', {'conversation_id': conversation_id, 'message': message}, room=f"convo_{conversation_id}")
+        await sio.emit('conversation_updated', {'conversation_id': conversation_id}, room=None)
+    except Exception as e:
+        logger.error(f"Socket emit error: {e}")
+
 
 # ─── PYDANTIC MODELS ──────────────────────────────────────────
 class RegisterInput(BaseModel):
