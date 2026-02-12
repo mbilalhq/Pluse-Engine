@@ -26,150 +26,99 @@ export default function Layout({ children }) {
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef(null);
 
-  // Close profile dropdown on click outside
   useEffect(() => {
     function handleClick(e) {
-      if (profileRef.current && !profileRef.current.contains(e.target)) {
-        setProfileOpen(false);
-      }
+      if (profileRef.current && !profileRef.current.contains(e.target)) setProfileOpen(false);
     }
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
-  // Close dropdown on route change
-  useEffect(() => {
-    setProfileOpen(false);
-  }, [location.pathname]);
+  useEffect(() => { setProfileOpen(false); }, [location.pathname]);
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
+  const handleLogout = () => { logout(); navigate('/signin'); };
 
   return (
-    <div className="flex h-screen bg-[#030712] text-gray-100 overflow-hidden" data-testid="app-layout">
+    <div className="flex h-screen bg-slate-50 text-slate-900 overflow-hidden" data-testid="app-layout">
       {/* Sidebar */}
-      <aside
-        className={`${sidebarOpen ? 'w-64' : 'w-20'} flex-shrink-0 bg-[#0a0f1a] border-r border-gray-800/60 flex flex-col transition-all duration-300 ease-in-out`}
-        data-testid="sidebar"
-      >
-        {/* Logo */}
-        <div className="h-16 flex items-center px-5 border-b border-gray-800/60">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shadow-lg shadow-violet-500/20">
-              <Zap size={18} className="text-white" />
+      <aside className={`${sidebarOpen ? 'w-60' : 'w-[72px]'} flex-shrink-0 bg-white border-r border-slate-100 flex flex-col transition-all duration-200`} data-testid="sidebar">
+        <div className="h-14 flex items-center px-5 border-b border-slate-100">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center shadow-sm">
+              <Zap size={16} className="text-white" />
             </div>
-            {sidebarOpen && (
-              <span className="font-bold text-lg tracking-tight bg-gradient-to-r from-violet-400 to-fuchsia-400 bg-clip-text text-transparent">
-                NexusEngage
-              </span>
-            )}
+            {sidebarOpen && <span className="font-bold text-base text-slate-900 tracking-tight">Pulse Engine</span>}
           </div>
         </div>
-
-        {/* Nav */}
-        <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
+        <nav className="flex-1 py-3 px-3 space-y-0.5 overflow-y-auto">
           {navItems.map(({ path, label, icon: Icon }) => {
             const active = location.pathname.startsWith(path);
             return (
               <Link
-                key={path}
-                to={path}
+                key={path} to={path}
                 data-testid={`nav-${label.toLowerCase().replace(/\s+/g, '-')}`}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200
-                  ${active
-                    ? 'bg-violet-500/15 text-violet-400 border border-violet-500/30 shadow-[0_0_12px_rgba(139,92,246,0.1)]'
-                    : 'text-gray-400 hover:text-gray-200 hover:bg-gray-800/50'
-                  }`}
+                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-all
+                  ${active ? 'bg-blue-50 text-blue-600' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'}`}
               >
-                <Icon size={20} className={active ? 'text-violet-400' : ''} />
+                <Icon size={18} />
                 {sidebarOpen && <span>{label}</span>}
               </Link>
             );
           })}
         </nav>
-
-        {/* User */}
-        <div className="p-3 border-t border-gray-800/60">
-          <div className="flex items-center gap-3 px-3 py-2">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-600 flex items-center justify-center text-xs font-bold text-white">
+        <div className="p-3 border-t border-slate-100">
+          <div className="flex items-center gap-2.5 px-3 py-2">
+            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-xs font-bold text-blue-600">
               {user?.name?.charAt(0) || 'U'}
             </div>
             {sidebarOpen && (
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{user?.name || 'User'}</p>
-                <p className="text-xs text-gray-500 capitalize">{user?.role || 'agent'}</p>
+                <p className="text-[13px] font-medium text-slate-900 truncate">{user?.name || 'User'}</p>
+                <p className="text-[11px] text-slate-400 capitalize">{user?.role || 'agent'}</p>
               </div>
             )}
           </div>
         </div>
       </aside>
 
-      {/* Main */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top Bar */}
-        <header className="h-16 flex items-center justify-between px-6 border-b border-gray-800/60 bg-[#030712]/80 backdrop-blur-xl z-10">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-2 rounded-lg hover:bg-gray-800/50 text-gray-400 transition-colors"
-              data-testid="toggle-sidebar-btn"
-            >
-              {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
+        <header className="h-14 flex items-center justify-between px-5 border-b border-slate-100 bg-white/80 backdrop-blur-xl z-10">
+          <div className="flex items-center gap-3">
+            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-1.5 rounded-md hover:bg-slate-100 text-slate-400 transition-colors" data-testid="toggle-sidebar-btn">
+              {sidebarOpen ? <X size={18} /> : <Menu size={18} />}
             </button>
-            <div className="relative">
-              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-              <input
-                type="text"
-                placeholder="Search conversations, leads, customers..."
-                className="w-80 pl-10 pr-4 py-2 bg-gray-800/50 border border-gray-700/50 rounded-lg text-sm text-gray-300 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-violet-500/50 focus:border-violet-500/50 transition-all"
-                data-testid="global-search-input"
-              />
+            <div className="relative hidden md:block">
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input type="text" placeholder="Search..." className="w-72 pl-9 pr-4 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" data-testid="global-search-input" />
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <button className="relative p-2 rounded-lg hover:bg-gray-800/50 text-gray-400 transition-colors" data-testid="notifications-btn">
-              <Bell size={20} />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-violet-500 rounded-full"></span>
+          <div className="flex items-center gap-2">
+            <button className="relative p-1.5 rounded-md hover:bg-slate-100 text-slate-400 transition-colors" data-testid="notifications-btn">
+              <Bell size={18} />
+              <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
             </button>
             <div className="relative" ref={profileRef}>
-              <button
-                onClick={() => setProfileOpen(!profileOpen)}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-gray-800/50 transition-colors"
-                data-testid="profile-menu-btn"
-              >
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-600 flex items-center justify-center text-xs font-bold text-white">
+              <button onClick={() => setProfileOpen(!profileOpen)} className="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-slate-100 transition-colors" data-testid="profile-menu-btn">
+                <div className="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center text-[11px] font-bold text-blue-600">
                   {user?.name?.charAt(0) || 'U'}
                 </div>
-                <ChevronDown size={14} className="text-gray-400" />
+                <ChevronDown size={12} className="text-slate-400" />
               </button>
               {profileOpen && (
-                <div className="absolute right-0 top-12 w-52 bg-[#111827] border border-gray-700/60 rounded-xl shadow-xl py-2 z-50" data-testid="profile-dropdown">
-                  <div className="px-4 py-2 border-b border-gray-700/60">
-                    <p className="text-sm font-medium">{user?.name}</p>
-                    <p className="text-xs text-gray-500">{user?.email}</p>
+                <div className="absolute right-0 top-10 w-48 bg-white border border-slate-200 rounded-xl shadow-xl py-1.5 z-50" data-testid="profile-dropdown">
+                  <div className="px-3 py-2 border-b border-slate-100">
+                    <p className="text-sm font-medium text-slate-900">{user?.name}</p>
+                    <p className="text-[11px] text-slate-400">{user?.email}</p>
                   </div>
-                  <Link to="/settings" className="flex items-center gap-2 px-4 py-2 text-sm text-gray-400 hover:text-gray-200 hover:bg-gray-800/50">
-                    <UserCircle size={16} /> Profile
-                  </Link>
-                  <button
-                    onClick={handleLogout}
-                    className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-400 hover:text-red-300 hover:bg-gray-800/50"
-                    data-testid="logout-btn"
-                  >
-                    <LogOut size={16} /> Logout
-                  </button>
+                  <Link to="/settings" className="flex items-center gap-2 px-3 py-2 text-sm text-slate-600 hover:bg-slate-50"><UserCircle size={14} /> Profile</Link>
+                  <button onClick={handleLogout} className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-500 hover:bg-red-50" data-testid="logout-btn"><LogOut size={14} /> Sign Out</button>
                 </div>
               )}
             </div>
           </div>
         </header>
-
-        {/* Content */}
-        <main className="flex-1 overflow-y-auto" data-testid="main-content">
-          {children}
-        </main>
+        <main className="flex-1 overflow-y-auto" data-testid="main-content">{children}</main>
       </div>
     </div>
   );
