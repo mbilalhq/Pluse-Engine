@@ -1119,6 +1119,7 @@ async def dashboard_feed(request: Request):
 
 
 app.include_router(api)
+fastapi_app.include_router(api)
 
 
 @app.on_event("startup")
