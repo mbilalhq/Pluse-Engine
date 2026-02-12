@@ -1261,8 +1261,9 @@ async def nurture_lead(lead_id: str, request: Request):
     return result
 
 
-app.include_router(api)
 fastapi_app.include_router(api)
+
+# Note: app is the socketio ASGIApp wrapping fastapi_app
 
 
 @fastapi_app.on_event("startup")
