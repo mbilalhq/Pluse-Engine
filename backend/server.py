@@ -579,12 +579,22 @@ async def send_message(convo_id: str, body: MessageCreate, request: Request):
     }, "$inc": {"unread_count": 1 if body.sender_type == "customer" else 0}})
 
     clean_doc(message)
+
+    # Emit WebSocket event
+    await emit_new_message(convo_id, message)
+
+    # Send via WhatsApp if channel is whatsapp and sender is agent
+    if body.sender_type == "agent" and convo.get("channel") == "whatsapp":
+        customer = await db.customers.find_one({"id": convo.get("customer_id", "")}, {"_id": 0})
+        if customer and customer.get("phone"):
+            await send_whatsapp_message(customer["phone"], body.content)
+
     ai_response = None
     if body.sender_type == "customer" and convo.get("ai_handled", True):
         try:
             messages_history = await db.messages.find({"conversation_id": convo_id}, {"_id": 0}).sort("created_at", 1).to_list(20)
             customer = await db.customers.find_one({"id": convo.get("customer_id", "")}, {"_id": 0})
-            result = await generate_ai_response(messages_history, customer)
+            result = await generate_ai_response(messages_history, customer, db=db)
             if result["confidence"] > 0.6:
                 ai_msg_id = make_id()
                 ai_message = {
@@ -598,6 +608,11 @@ async def send_message(convo_id: str, body: MessageCreate, request: Request):
                     "message_count": convo.get("message_count", 0) + 2, "ai_handled": True,
                 }})
                 ai_response = clean_doc(ai_message)
+                await emit_new_message(convo_id, ai_response)
+
+                # Send AI response via WhatsApp if applicable
+                if convo.get("channel") == "whatsapp" and customer and customer.get("phone"):
+                    await send_whatsapp_message(customer["phone"], result["response"])
         except Exception as e:
             logger.error(f"AI response failed: {e}")
 
