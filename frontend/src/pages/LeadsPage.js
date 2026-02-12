@@ -198,17 +198,24 @@ export default function LeadsPage() {
                 >
                   <Sparkles size={14} /> {scoring ? 'Scoring...' : 'AI Score'}
                 </button>
-                <select
-                  value={selectedLead.status}
-                  onChange={(e) => updateStatus(selectedLead.id, e.target.value)}
-                  className="flex-1 px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-600 focus:outline-none focus:ring-1 focus:ring-blue-500/20"
-                  data-testid="lead-status-select"
+                <button
+                  onClick={async () => { try { const r = await api.post(`/leads/${selectedLead.id}/nurture`); alert(`Nurture message:\n\n${r.data.message}`); } catch(e) { console.error(e); } }}
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-50 border border-blue-200 text-blue-600 rounded-xl text-sm font-medium hover:bg-blue-100 transition-colors"
+                  data-testid="nurture-lead-btn"
                 >
-                  {['new', 'contacted', 'qualified', 'proposal', 'negotiation', 'won', 'lost'].map(s => (
-                    <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
-                  ))}
-                </select>
+                  <Sparkles size={14} /> Nurture
+                </button>
               </div>
+              <select
+                value={selectedLead.status}
+                onChange={(e) => updateStatus(selectedLead.id, e.target.value)}
+                className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-600 focus:outline-none focus:ring-1 focus:ring-blue-500/20"
+                data-testid="lead-status-select"
+              >
+                {['new', 'contacted', 'qualified', 'proposal', 'negotiation', 'won', 'lost'].map(s => (
+                  <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
+                ))}
+              </select>
             </div>
           </div>
         </div>
