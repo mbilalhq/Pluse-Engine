@@ -1265,7 +1265,7 @@ app.include_router(api)
 fastapi_app.include_router(api)
 
 
-@app.on_event("startup")
+@fastapi_app.on_event("startup")
 async def startup():
     logger.info("Pulse Engine AI Platform starting up...")
     existing = await db.users.find_one({"email": "admin@pulseengine.com"})
